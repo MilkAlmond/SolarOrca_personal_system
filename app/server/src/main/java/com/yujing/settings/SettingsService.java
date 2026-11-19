@@ -2,6 +2,7 @@ package com.yujing.settings;
 
 import com.yujing.common.error.BizException;
 import com.yujing.common.error.ErrorCode;
+import com.yujing.common.time.ClientZone;
 import com.yujing.settings.dto.SettingsView;
 import com.yujing.settings.mapper.UserSettingsMapper;
 import com.yujing.settings.model.UserSettingsRow;
@@ -23,10 +24,16 @@ public class SettingsService {
     }
 
     @Transactional
-    public SettingsView get(Long ownerId) {
+    public SettingsView get(Long ownerId, ClientZone zone) {
         UserSettingsRow row = mapper.findByOwner(ownerId);
+        LocalDateTime now = LocalDateTime.now(clock);
         if (row == null) {
-            mapper.insertDefault(ownerId, LocalDateTime.now(clock));
+            mapper.insertDefault(ownerId, now);
+        }
+        if (zone != null) {
+            mapper.updateTimeZone(ownerId, zone.offsetMinutes(), now);
+        }
+        if (row == null) {
             row = mapper.findByOwner(ownerId);
         }
         if (row == null) {

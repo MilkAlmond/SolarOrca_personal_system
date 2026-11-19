@@ -1,9 +1,11 @@
 package com.yujing.settings;
 
 import com.yujing.common.api.ApiResponse;
+import com.yujing.common.time.ClientZone;
 import com.yujing.settings.dto.SettingsView;
 import com.yujing.settings.dto.UpdateSettingsRequest;
 import com.yujing.security.CurrentUserProvider;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -24,8 +26,9 @@ public class SettingsController {
     }
 
     @GetMapping
-    public ApiResponse<SettingsView> get() {
-        return ApiResponse.ok(settingsService.get(currentUserProvider.requireId()));
+    public ApiResponse<SettingsView> get(HttpServletRequest request) {
+        return ApiResponse.ok(settingsService.get(currentUserProvider.requireId(),
+                ClientZone.from(request)));
     }
 
     @PatchMapping

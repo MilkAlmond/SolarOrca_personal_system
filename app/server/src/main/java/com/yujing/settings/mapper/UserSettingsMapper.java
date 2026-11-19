@@ -33,4 +33,14 @@ public interface UserSettingsMapper {
     int updateEnabled(@Param("ownerId") Long ownerId,
                       @Param("enabled") boolean enabled,
                       @Param("now") LocalDateTime now);
+
+    @Update("""
+            UPDATE user_settings
+               SET timezone_offset_minutes = #{minutes},
+                   updated_at = #{now}
+             WHERE owner_id = #{ownerId}
+            """)
+    int updateTimeZone(@Param("ownerId") Long ownerId,
+                       @Param("minutes") int minutes,
+                       @Param("now") LocalDateTime now);
 }
