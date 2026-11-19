@@ -15,6 +15,9 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.yujing.common.api.ApiResponse;
@@ -79,6 +82,23 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(ErrorCode.UNSUPPORTED_MEDIA_TYPE.httpStatus())
                 .body(ApiResponse.error(ErrorCode.UNSUPPORTED_MEDIA_TYPE.code(),
                         ErrorCode.UNSUPPORTED_MEDIA_TYPE.message(), null));
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiResponse<Object>> handleMaxUpload(MaxUploadSizeExceededException ex) {
+        return ResponseEntity.status(ErrorCode.FILE_TOO_LARGE.httpStatus())
+                .body(ApiResponse.error(ErrorCode.FILE_TOO_LARGE.code(),
+                        ErrorCode.FILE_TOO_LARGE.message(), null));
+    }
+
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<ApiResponse<Object>> handleMissingPart(MissingServletRequestPartException ex) {
+        return validationError(Map.of(ex.getRequestPartName(), "文件不能为空"));
+    }
+
+    @ExceptionHandler(MultipartException.class)
+    public ResponseEntity<ApiResponse<Object>> handleMultipart(MultipartException ex) {
+        return badRequest(ErrorCode.MALFORMED_REQUEST.code(), ErrorCode.MALFORMED_REQUEST.message(), null);
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
