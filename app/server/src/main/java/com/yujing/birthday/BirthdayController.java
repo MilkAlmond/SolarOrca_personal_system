@@ -6,6 +6,7 @@ import com.yujing.birthday.dto.BirthdayView;
 import com.yujing.common.api.ApiResponse;
 import com.yujing.common.time.ClientZone;
 import com.yujing.security.CurrentUserProvider;
+import com.yujing.sync.SyncTimes;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,9 +33,14 @@ public class BirthdayController {
     }
 
     @GetMapping
-    public ApiResponse<List<BirthdayView>> list(HttpServletRequest request) {
-        return ApiResponse.ok(birthdayService.list(currentUserProvider.requireId(),
-                ClientZone.from(request)));
+    public ApiResponse<?> list(@RequestParam(required = false) String since,
+                               HttpServletRequest request) {
+        Long ownerId = currentUserProvider.requireId();
+        ClientZone zone = ClientZone.from(request);
+        if (since == null || since.isBlank()) {
+            return ApiResponse.ok(birthdayService.list(ownerId, zone));
+        }
+        return ApiResponse.ok(birthdayService.changes(ownerId, SyncTimes.parseSince(since), zone));
     }
 
     @PostMapping

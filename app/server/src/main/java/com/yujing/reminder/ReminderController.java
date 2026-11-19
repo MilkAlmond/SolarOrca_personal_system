@@ -35,8 +35,13 @@ public class ReminderController {
     }
 
     @GetMapping
-    public ApiResponse<List<ReminderView>> list() {
-        return ApiResponse.ok(reminderService.list(currentUserProvider.requireId()));
+    public ApiResponse<?> list(@RequestParam(required = false) String since) {
+        Long ownerId = currentUserProvider.requireId();
+        if (since == null || since.isBlank()) {
+            return ApiResponse.ok(reminderService.list(ownerId));
+        }
+        return ApiResponse.ok(reminderService.changes(ownerId,
+                com.yujing.sync.SyncTimes.parseSince(since)));
     }
 
     @PostMapping

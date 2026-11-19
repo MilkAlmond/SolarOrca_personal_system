@@ -52,6 +52,13 @@ public class CourseService {
         return mapper.findAll(ownerId).stream().map(CourseService::toView).toList();
     }
 
+    public com.yujing.sync.dto.SyncPayload<CourseView> changes(Long ownerId, LocalDateTime since) {
+        return new com.yujing.sync.dto.SyncPayload<>(
+                mapper.findChanged(ownerId, since).stream().map(CourseService::toView).toList(),
+                tombstoneService.changes(ownerId, TombstoneService.COURSE, since),
+                com.yujing.sync.SyncTimes.serverTime(clock));
+    }
+
     @Transactional
     public CourseSaveResult create(Long ownerId, CourseRequest request, ClientZone zone) {
         CourseRow row = new CourseRow();

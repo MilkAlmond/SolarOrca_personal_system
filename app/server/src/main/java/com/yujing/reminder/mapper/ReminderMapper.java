@@ -19,6 +19,15 @@ public interface ReminderMapper {
     @Select("SELECT * FROM reminders WHERE owner_id = #{ownerId} ORDER BY trigger_at, id")
     List<ReminderRow> findByOwner(@Param("ownerId") Long ownerId);
 
+    @Select("""
+            SELECT * FROM reminders
+             WHERE owner_id = #{ownerId}
+               AND updated_at > #{since}
+             ORDER BY updated_at, id
+            """)
+    List<ReminderRow> findChanged(@Param("ownerId") Long ownerId,
+                                  @Param("since") LocalDateTime since);
+
     @Select("SELECT * FROM reminders WHERE owner_id = #{ownerId} AND id = #{id}")
     ReminderRow findById(@Param("ownerId") Long ownerId, @Param("id") Long id);
 

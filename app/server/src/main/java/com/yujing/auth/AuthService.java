@@ -120,6 +120,13 @@ public class AuthService {
             throw new BizException(ErrorCode.INVALID_CREDENTIALS);
         }
 
+        if (user.getDeletionScheduledAt() != null) {
+            // Plan 9.6: a frozen account cannot log in; cancellation uses the
+            // dedicated public endpoint instead.
+            auditService.record(user.getId(), "LOGIN", user.getUsername(), "failed", meta.ip(), "frozen");
+            throw new BizException(ErrorCode.ACCOUNT_FROZEN);
+        }
+
         userMapper.markLoginSuccess(user.getId(), now);
         auditService.record(user.getId(), "LOGIN", user.getUsername(), "success", meta.ip(), null);
         return createSession(user, meta, now);

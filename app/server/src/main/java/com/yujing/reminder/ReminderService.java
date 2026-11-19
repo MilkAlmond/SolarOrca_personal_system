@@ -140,6 +140,13 @@ public class ReminderService {
         return reminderMapper.findByOwner(ownerId).stream().map(ReminderService::toView).toList();
     }
 
+    public com.yujing.sync.dto.SyncPayload<ReminderView> changes(Long ownerId, LocalDateTime since) {
+        return new com.yujing.sync.dto.SyncPayload<>(
+                reminderMapper.findChanged(ownerId, since).stream().map(ReminderService::toView).toList(),
+                tombstoneService.changes(ownerId, TombstoneService.REMINDER, since),
+                com.yujing.sync.SyncTimes.serverTime(clock));
+    }
+
     @Transactional
     public ReminderView createManual(Long ownerId, CreateReminderRequest request, ClientZone zone) {
         LocalDateTime now = LocalDateTime.now(clock);

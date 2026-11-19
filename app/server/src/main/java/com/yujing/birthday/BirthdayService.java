@@ -12,7 +12,9 @@ import com.yujing.common.time.ClientZone;
 import com.yujing.reminder.ReminderKeys;
 import com.yujing.reminder.ReminderService;
 import com.yujing.reminder.ReminderSpec;
+import com.yujing.sync.SyncTimes;
 import com.yujing.sync.TombstoneService;
+import com.yujing.sync.dto.SyncPayload;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,6 +59,16 @@ public class BirthdayService {
                                 Comparator.nullsLast(Comparator.naturalOrder()))
                         .thenComparing(BirthdayView::id))
                 .toList();
+    }
+
+    public SyncPayload<BirthdayView> changes(Long ownerId, LocalDateTime since, ClientZone zone) {
+        LocalDate today = zone.today(clock);
+        List<BirthdayView> items = mapper.findChanged(ownerId, since).stream()
+                .map(row -> toView(row, today))
+                .toList();
+        return new SyncPayload<>(items,
+                tombstoneService.changes(ownerId, TombstoneService.BIRTHDAY, since),
+                SyncTimes.serverTime(clock));
     }
 
     @Transactional

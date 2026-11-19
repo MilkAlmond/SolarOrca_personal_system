@@ -53,6 +53,13 @@ public class NoteService {
         return toView(require(ownerId, id));
     }
 
+    public com.yujing.sync.dto.SyncPayload<NoteView> changes(Long ownerId, LocalDateTime since) {
+        return new com.yujing.sync.dto.SyncPayload<>(
+                noteMapper.findChanged(ownerId, since).stream().map(NoteService::toView).toList(),
+                tombstoneService.changes(ownerId, TombstoneService.NOTE, since),
+                com.yujing.sync.SyncTimes.serverTime(clock));
+    }
+
     @Transactional
     public NoteView create(Long ownerId, NoteRequest request) {
         NoteRow row = new NoteRow();

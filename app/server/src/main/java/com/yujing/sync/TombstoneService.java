@@ -1,9 +1,13 @@
 package com.yujing.sync;
 
+import com.yujing.sync.dto.TombstoneView;
 import com.yujing.sync.mapper.SyncTombstoneMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
 
 /**
  * Records a 30-day delete marker after the business row is physically removed
@@ -26,5 +30,21 @@ public class TombstoneService {
 
     public void record(Long ownerId, String entityType, Long entityId, long entityVersion, LocalDateTime now) {
         mapper.upsert(ownerId, entityType, entityId, entityVersion, now);
+    }
+
+    public List<TombstoneView> changes(Long ownerId, String entityType, LocalDateTime since) {
+        return mapper.findSinceType(ownerId, entityType, since).stream()
+                .map(row -> new TombstoneView(row.getEntityType(), row.getEntityId(),
+                        row.getEntityVersion(),
+                        OffsetDateTime.of(row.getDeletedAt(), ZoneOffset.UTC)))
+                .toList();
+    }
+
+    public List<TombstoneView> changes(Long ownerId, LocalDateTime since) {
+        return mapper.findSince(ownerId, since).stream()
+                .map(row -> new TombstoneView(row.getEntityType(), row.getEntityId(),
+                        row.getEntityVersion(),
+                        OffsetDateTime.of(row.getDeletedAt(), ZoneOffset.UTC)))
+                .toList();
     }
 }

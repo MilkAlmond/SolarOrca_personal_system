@@ -73,6 +73,21 @@ public class FileStorage {
         return new StoredFile(relativePath, sha256(bytes), bytes.length);
     }
 
+    /**
+     * Writes an internally generated artefact (export ZIP). Unlike {@link #store},
+     * the PNG check does not apply; the path is always chosen by the server.
+     */
+    public String write(String relativePath, byte[] bytes) {
+        Path target = resolve(relativePath);
+        try {
+            Files.createDirectories(target.getParent());
+            Files.write(target, bytes, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
+        } catch (IOException ex) {
+            throw new BizException(ErrorCode.SERVICE_UNAVAILABLE);
+        }
+        return sha256(bytes);
+    }
+
     public byte[] read(String relativePath) {
         try {
             return Files.readAllBytes(resolve(relativePath));
@@ -109,7 +124,7 @@ public class FileStorage {
         return resolved;
     }
 
-    private static String sha256(byte[] bytes) {
+    public static String sha256(byte[] bytes) {
         try {
             return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));
         } catch (NoSuchAlgorithmException ex) {

@@ -1,6 +1,7 @@
 package com.yujing.auth.mapper;
 
 import com.yujing.auth.model.UserRow;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
@@ -9,6 +10,7 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Mapper
 public interface UserMapper {
@@ -74,4 +76,39 @@ public interface UserMapper {
     int updatePassword(@Param("id") Long id,
                        @Param("passwordHash") String passwordHash,
                        @Param("now") LocalDateTime now);
+
+    @Update("""
+            UPDATE users
+               SET deletion_requested_at = #{requestedAt},
+                   deletion_scheduled_at = #{scheduledAt},
+                   version = version + 1,
+                   updated_at = #{now}
+             WHERE id = #{id}
+            """)
+    int updateDeletion(@Param("id") Long id,
+                       @Param("requestedAt") LocalDateTime requestedAt,
+                       @Param("scheduledAt") LocalDateTime scheduledAt,
+                       @Param("now") LocalDateTime now);
+
+    @Update("""
+            UPDATE users
+               SET deletion_requested_at = NULL,
+                   deletion_scheduled_at = NULL,
+                   version = version + 1,
+                   updated_at = #{now}
+             WHERE id = #{id}
+            """)
+    int clearDeletion(@Param("id") Long id, @Param("now") LocalDateTime now);
+
+    @Select("""
+            SELECT * FROM users
+             WHERE deletion_scheduled_at IS NOT NULL
+               AND deletion_scheduled_at <= #{now}
+             ORDER BY deletion_scheduled_at
+             LIMIT #{limit}
+            """)
+    List<UserRow> findDeletionDue(@Param("now") LocalDateTime now, @Param("limit") int limit);
+
+    @Delete("DELETE FROM users WHERE id = #{id}")
+    int deleteById(@Param("id") Long id);
 }

@@ -19,6 +19,15 @@ public interface BirthdayMapper {
     @Select("SELECT * FROM birthdays WHERE owner_id = #{ownerId} ORDER BY id")
     List<BirthdayRow> findAll(@Param("ownerId") Long ownerId);
 
+    @Select("""
+            SELECT * FROM birthdays
+             WHERE owner_id = #{ownerId}
+               AND updated_at > #{since}
+             ORDER BY updated_at, id
+            """)
+    List<BirthdayRow> findChanged(@Param("ownerId") Long ownerId,
+                                  @Param("since") java.time.LocalDateTime since);
+
     @Select("SELECT * FROM birthdays WHERE owner_id = #{ownerId} AND id = #{id}")
     BirthdayRow findById(@Param("ownerId") Long ownerId, @Param("id") Long id);
 

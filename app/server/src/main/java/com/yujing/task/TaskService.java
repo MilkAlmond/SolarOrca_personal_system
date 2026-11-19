@@ -60,6 +60,19 @@ public class TaskService {
                 .toList();
     }
 
+    public com.yujing.sync.dto.SyncPayload<TaskView> changes(Long ownerId, LocalDateTime since,
+                                                             ClientZone zone) {
+        LocalDate today = zone.today(clock);
+        Map<Long, List<LocalDate>> checkins = groupCheckins(ownerId);
+        Map<Long, List<Integer>> milestones = groupMilestones(ownerId);
+        List<TaskView> items = mapper.findChanged(ownerId, since).stream()
+                .map(row -> toView(row, today, checkins.get(row.getId()), milestones.get(row.getId())))
+                .toList();
+        return new com.yujing.sync.dto.SyncPayload<>(items,
+                tombstoneService.changes(ownerId, TombstoneService.TASK, since),
+                com.yujing.sync.SyncTimes.serverTime(clock));
+    }
+
     public List<TaskView> today(Long ownerId, LocalDate date, ClientZone zone) {
         LocalDate target = date == null ? zone.today(clock) : date;
         Map<Long, List<LocalDate>> checkins = groupCheckins(ownerId);
@@ -142,6 +155,7 @@ public class TaskService {
             } catch (org.springframework.dao.DuplicateKeyException ignored) {
                 // Another device checked in first; idempotent by design.
             }
+            mapper.touch(ownerId, id, now);
         }
 
         TaskView view = toView(row, date,
@@ -153,6 +167,7 @@ public class TaskService {
     public TaskView undoCheckin(Long ownerId, Long id, LocalDate date) {
         TaskRow row = require(ownerId, id);
         mapper.deleteCheckin(ownerId, id, date);
+        mapper.touch(ownerId, id, LocalDateTime.now(clock));
         return toView(row, date,
                 mapper.findTaskCheckinDates(ownerId, id), milestonesFor(ownerId, id));
     }

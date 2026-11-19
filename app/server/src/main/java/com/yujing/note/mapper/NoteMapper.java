@@ -39,8 +39,20 @@ public interface NoteMapper {
             """)
     long count(@Param("ownerId") Long ownerId, @Param("keyword") String keyword);
 
+    @Select("""
+            SELECT * FROM notes
+             WHERE owner_id = #{ownerId}
+               AND updated_at > #{since}
+             ORDER BY updated_at, id
+            """)
+    List<NoteRow> findChanged(@Param("ownerId") Long ownerId,
+                              @Param("since") java.time.LocalDateTime since);
+
     @Select("SELECT * FROM notes WHERE owner_id = #{ownerId} AND id = #{id}")
     NoteRow findById(@Param("ownerId") Long ownerId, @Param("id") Long id);
+
+    @Select("SELECT * FROM notes WHERE owner_id = #{ownerId} ORDER BY id")
+    List<NoteRow> findAll(@Param("ownerId") Long ownerId);
 
     @Insert("""
             INSERT INTO notes (owner_id, title, body, category, version, created_at, updated_at)

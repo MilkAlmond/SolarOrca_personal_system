@@ -23,6 +23,15 @@ public interface CourseMapper {
             """)
     List<CourseRow> findAll(@Param("ownerId") Long ownerId);
 
+    @Select("""
+            SELECT * FROM courses
+             WHERE owner_id = #{ownerId}
+               AND updated_at > #{since}
+             ORDER BY updated_at, id
+            """)
+    List<CourseRow> findChanged(@Param("ownerId") Long ownerId,
+                                @Param("since") java.time.LocalDateTime since);
+
     @Select("SELECT * FROM courses WHERE owner_id = #{ownerId} AND id = #{id}")
     CourseRow findById(@Param("ownerId") Long ownerId, @Param("id") Long id);
 

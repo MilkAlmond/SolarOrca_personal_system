@@ -41,6 +41,17 @@ public interface SyncTombstoneMapper {
     @Select("""
             SELECT * FROM sync_tombstones
              WHERE owner_id = #{ownerId}
+               AND entity_type = #{entityType}
+               AND deleted_at > #{since}
+             ORDER BY deleted_at, id
+            """)
+    List<SyncTombstoneRow> findSinceType(@Param("ownerId") Long ownerId,
+                                         @Param("entityType") String entityType,
+                                         @Param("since") LocalDateTime since);
+
+    @Select("""
+            SELECT * FROM sync_tombstones
+             WHERE owner_id = #{ownerId}
              ORDER BY deleted_at, id
             """)
     List<SyncTombstoneRow> findAll(@Param("ownerId") Long ownerId);

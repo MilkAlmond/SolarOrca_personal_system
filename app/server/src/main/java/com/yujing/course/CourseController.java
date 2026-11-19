@@ -32,8 +32,13 @@ public class CourseController {
     }
 
     @GetMapping
-    public ApiResponse<List<CourseView>> list() {
-        return ApiResponse.ok(courseService.list(currentUserProvider.requireId()));
+    public ApiResponse<?> list(@RequestParam(required = false) String since) {
+        Long ownerId = currentUserProvider.requireId();
+        if (since == null || since.isBlank()) {
+            return ApiResponse.ok(courseService.list(ownerId));
+        }
+        return ApiResponse.ok(courseService.changes(ownerId,
+                com.yujing.sync.SyncTimes.parseSince(since)));
     }
 
     @PostMapping

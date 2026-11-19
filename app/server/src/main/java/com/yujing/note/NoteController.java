@@ -29,10 +29,16 @@ public class NoteController {
     }
 
     @GetMapping
-    public ApiResponse<PageData<NoteSummary>> list(@RequestParam(defaultValue = "1") int page,
-                                                   @RequestParam(defaultValue = "20") int size,
-                                                   @RequestParam(required = false) String keyword) {
-        return ApiResponse.ok(noteService.list(currentUserProvider.requireId(), keyword, page, size));
+    public ApiResponse<?> list(@RequestParam(defaultValue = "1") int page,
+                               @RequestParam(defaultValue = "20") int size,
+                               @RequestParam(required = false) String keyword,
+                               @RequestParam(required = false) String since) {
+        Long ownerId = currentUserProvider.requireId();
+        if (since != null && !since.isBlank()) {
+            return ApiResponse.ok(noteService.changes(ownerId,
+                    com.yujing.sync.SyncTimes.parseSince(since)));
+        }
+        return ApiResponse.ok(noteService.list(ownerId, keyword, page, size));
     }
 
     @GetMapping("/{id}")

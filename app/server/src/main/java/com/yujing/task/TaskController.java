@@ -35,9 +35,15 @@ public class TaskController {
     }
 
     @GetMapping
-    public ApiResponse<List<TaskView>> list(HttpServletRequest request) {
-        return ApiResponse.ok(taskService.list(currentUserProvider.requireId(),
-                ClientZone.from(request)));
+    public ApiResponse<?> list(@RequestParam(required = false) String since,
+                               HttpServletRequest request) {
+        Long ownerId = currentUserProvider.requireId();
+        ClientZone zone = ClientZone.from(request);
+        if (since == null || since.isBlank()) {
+            return ApiResponse.ok(taskService.list(ownerId, zone));
+        }
+        return ApiResponse.ok(taskService.changes(ownerId,
+                com.yujing.sync.SyncTimes.parseSince(since), zone));
     }
 
     @GetMapping("/today")

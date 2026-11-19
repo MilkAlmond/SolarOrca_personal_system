@@ -23,6 +23,24 @@ public interface TaskMapper {
     @Select("SELECT * FROM tasks WHERE owner_id = #{ownerId} ORDER BY id")
     List<TaskRow> findAll(@Param("ownerId") Long ownerId);
 
+    @Select("""
+            SELECT * FROM tasks
+             WHERE owner_id = #{ownerId}
+               AND updated_at > #{since}
+             ORDER BY updated_at, id
+            """)
+    List<TaskRow> findChanged(@Param("ownerId") Long ownerId,
+                              @Param("since") java.time.LocalDateTime since);
+
+    @Update("""
+            UPDATE tasks
+               SET updated_at = #{now}
+             WHERE owner_id = #{ownerId}
+               AND id = #{id}
+            """)
+    int touch(@Param("ownerId") Long ownerId, @Param("id") Long id,
+              @Param("now") java.time.LocalDateTime now);
+
     @Select("SELECT * FROM tasks WHERE owner_id = #{ownerId} AND id = #{id}")
     TaskRow findById(@Param("ownerId") Long ownerId, @Param("id") Long id);
 
@@ -107,7 +125,7 @@ public interface TaskMapper {
                       @Param("date") LocalDate date);
 
     @Select("""
-            SELECT task_id, milestone_days FROM task_milestones
+            SELECT task_id, milestone_days, reached_on FROM task_milestones
              WHERE owner_id = #{ownerId}
              ORDER BY task_id, milestone_days
             """)
