@@ -1,0 +1,67 @@
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
+  forward-headers-strategy: framework
+  error:
+    include-stacktrace: never
+    include-message: never
+
+spring:
+  application:
+    name: yujing-server
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/yujing?useUnicode=true&characterEncoding=utf8&connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true&allowPublicKeyRetrieval=true&useSSL=false}
+    username: ${DB_USERNAME:yujing}
+    password: ${DB_PASSWORD:}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 5000
+      pool-name: yujing-pool
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+    validate-on-migrate: true
+    clean-disabled: true
+  jackson:
+    time-zone: UTC
+    serialization:
+      write-dates-as-timestamps: false
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+    default-fetch-size: 100
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+yujing:
+  app-version: 0.1.0
+  security:
+    cookie-name: yj_session
+    cookie-secure: ${COOKIE_SECURE:true}
+    cookie-max-age-days: 400
+    bcrypt-strength: 12
+    lock-threshold: 5
+    lock-minutes: 10
+  admin:
+    username: ${YUJING_ADMIN_USERNAME:}
+    password: ${YUJING_ADMIN_PASSWORD:}
+  cors:
+    allowed-origins: ${YUJING_CORS_ORIGINS:http://localhost:5173}
+  upload:
+    dir: ${UPLOAD_DIR:../data/uploads}
+
+logging:
+  pattern:
+    level: "%5p [%X{requestId:-}]"
+  level:
+    root: INFO
+    com.yujing: INFO

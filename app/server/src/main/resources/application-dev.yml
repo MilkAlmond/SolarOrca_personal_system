@@ -1,0 +1,13 @@
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
+logging:
+  level:
+    com.yujing: DEBUG
+
+yujing:
+  security:
+    cookie-secure: ${COOKIE_SECURE:false}
