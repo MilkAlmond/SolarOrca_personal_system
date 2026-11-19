@@ -86,3 +86,132 @@ export interface PageModel {
   honors: { name: string; awardedOn: string }[];
   contacts: { type: ContactType; displayText: string; target: string | null }[];
 }
+
+/* ---------- Workspace (M3/M4) ---------- */
+
+export interface BirthdayItem {
+  id: number;
+  name: string;
+  category: 'birthday' | 'anniversary';
+  calendarType: 'solar' | 'lunar';
+  solarDate: string | null;
+  lunarMonth: number | null;
+  lunarDay: number | null;
+  lunarLeap: boolean;
+  relationTag: string | null;
+  advanceDays: number;
+  note: string | null;
+  nextDate: string;
+  daysUntil: number;
+  leapAdjusted: boolean;
+  version: number;
+  updatedAt: string;
+}
+
+export interface CourseItem {
+  id: number;
+  name: string;
+  teacher: string | null;
+  location: string | null;
+  weekday: number;
+  startTime: string;
+  endTime: string;
+  repeatType: 'weekly' | 'once';
+  courseDate: string | null;
+  effectiveFrom: string | null;
+  effectiveTo: string | null;
+  remindMinutes: number;
+  version: number;
+  updatedAt: string;
+}
+
+export interface CourseSaveResult {
+  course: CourseItem;
+  conflicts: CourseItem[];
+  reminderNotice: string | null;
+}
+
+export interface TaskItem {
+  id: number;
+  name: string;
+  period: 'daily' | 'weekly';
+  weeklyTarget: number | null;
+  startDate: string;
+  remindTime: string;
+  enabled: boolean;
+  streakDays: number;
+  checkedToday: boolean;
+  weekProgress: number;
+  weekCompleted: boolean;
+  milestones: number[];
+  version: number;
+  updatedAt: string;
+}
+
+export interface TaskCheckinResult {
+  task: TaskItem;
+  newMilestone: number | null;
+}
+
+export interface NoteItem {
+  id: number;
+  title: string;
+  body: string;
+  category: string | null;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface NoteSummaryItem {
+  id: number;
+  title: string;
+  category: string | null;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReminderItem {
+  id: number;
+  source: 'birthday' | 'course' | 'task' | 'manual';
+  sourceId: number | null;
+  title: string;
+  triggerAt: string;
+  advanceMinutes: number;
+  enabled: boolean;
+  deliveryStatus: 'pending' | 'sent' | 'failed';
+  sentAt: string | null;
+  failedAt: string | null;
+  version: number;
+  updatedAt: string;
+}
+
+export interface Settings {
+  remindersEnabled: boolean;
+  version: number;
+}
+
+export interface ExportJob {
+  id: number;
+  status: 'pending' | 'ready' | 'failed' | 'expired';
+  createdAt: string;
+  completedAt: string | null;
+  expiresAt: string | null;
+  downloadUrl: string | null;
+}
+
+export interface DeviceItem {
+  deviceId: string;
+  platform: string;
+  appVersion: string | null;
+  notificationsEnabled: boolean;
+  lastSeenAt: string;
+  version: number;
+}
+
+export interface DeletionStatus {
+  frozen: boolean;
+  requestedAt: string | null;
+  scheduledAt: string | null;
+}

@@ -4,6 +4,7 @@ import com.yujing.audit.AuditService;
 import com.yujing.auth.dto.ChangePasswordRequest;
 import com.yujing.auth.dto.LoginRequest;
 import com.yujing.auth.dto.RegisterRequest;
+import com.yujing.auth.dto.UpdateProfileRequest;
 import com.yujing.auth.dto.UserView;
 import com.yujing.auth.mapper.SessionMapper;
 import com.yujing.auth.mapper.UserMapper;
@@ -163,6 +164,20 @@ public class AuthService {
             throw new BizException(ErrorCode.UNAUTHORIZED);
         }
         return toView(user);
+    }
+
+    @Transactional
+    public UserView updateProfile(CurrentUser current, UpdateProfileRequest request, ClientMeta meta) {
+        String displayName = request == null ? null : request.displayName();
+        if (displayName != null) {
+            displayName = displayName.strip();
+            if (displayName.isEmpty()) {
+                displayName = null;
+            }
+        }
+        userMapper.updateDisplayName(current.id(), displayName, LocalDateTime.now(clock));
+        auditService.record(current.id(), "PROFILE_UPDATE", current.username(), "success", meta.ip(), null);
+        return me(current);
     }
 
     private AuthSession createSession(UserRow user, ClientMeta meta, LocalDateTime now) {

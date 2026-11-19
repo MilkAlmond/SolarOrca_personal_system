@@ -4,6 +4,7 @@ import com.yujing.auth.dto.AuthView;
 import com.yujing.auth.dto.ChangePasswordRequest;
 import com.yujing.auth.dto.LoginRequest;
 import com.yujing.auth.dto.RegisterRequest;
+import com.yujing.auth.dto.UpdateProfileRequest;
 import com.yujing.auth.dto.UserView;
 import com.yujing.auth.model.AuthSession;
 import com.yujing.common.api.ApiResponse;
@@ -16,6 +17,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -72,6 +74,13 @@ public class AuthController {
     @GetMapping("/me")
     public ApiResponse<UserView> me() {
         return ApiResponse.ok(authService.me(currentUserProvider.require()));
+    }
+
+    @PatchMapping("/me")
+    public ApiResponse<UserView> updateProfile(@Valid @RequestBody UpdateProfileRequest body,
+                                               HttpServletRequest request) {
+        return ApiResponse.ok(authService.updateProfile(currentUserProvider.require(), body,
+                ClientMeta.from(request)));
     }
 
     private ResponseEntity<ApiResponse<AuthView>> authResponse(AuthSession session,

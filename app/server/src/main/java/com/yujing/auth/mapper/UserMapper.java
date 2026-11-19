@@ -79,6 +79,17 @@ public interface UserMapper {
 
     @Update("""
             UPDATE users
+               SET display_name = #{displayName},
+                   version = version + 1,
+                   updated_at = #{now}
+             WHERE id = #{id}
+            """)
+    int updateDisplayName(@Param("id") Long id,
+                          @Param("displayName") String displayName,
+                          @Param("now") LocalDateTime now);
+
+    @Update("""
+            UPDATE users
                SET deletion_requested_at = #{requestedAt},
                    deletion_scheduled_at = #{scheduledAt},
                    version = version + 1,
