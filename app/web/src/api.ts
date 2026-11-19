@@ -265,7 +265,9 @@ export function deleteTask(id: number, version: number): Promise<null> {
 }
 
 export function checkinTask(id: number): Promise<TaskCheckinResult> {
-  return request(`/tasks/${id}/checkins`, { method: 'POST', body: JSON.stringify({}) });
+  const now = new Date();
+  const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  return request(`/tasks/${id}/checkins`, { method: 'POST', body: JSON.stringify({ date }) });
 }
 
 export function undoCheckin(id: number, date: string): Promise<TaskItem> {
